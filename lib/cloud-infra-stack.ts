@@ -4,7 +4,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as CodeBuild from 'aws-cdk-lib/aws-codebuild';
 import * as CodePipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as CodePipelineAction from 'aws-cdk-lib/aws-codepipeline-actions'
-// import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import { BlockPublicAccess, BucketAccessControl } from 'aws-cdk-lib/aws-s3';
 import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 
@@ -28,6 +28,13 @@ export class CloudInfraStack extends cdk.Stack {
 
       new CfnOutput(this, 'Bucket', { value: websiteBucket.bucketName });
 
+      // deploy important files
+
+      new s3deploy.BucketDeployment(this, 'UploadWebsiteContent', {
+        sources: [s3deploy.Source.asset('./website-content')],
+        destinationBucket: websiteBucket,
+      });
+
     const outputSource = new CodePipeline.Artifact();
     const outputWebsite = new CodePipeline.Artifact();
 
@@ -46,7 +53,7 @@ export class CloudInfraStack extends cdk.Stack {
           repo: "prodx-reactwebui-react-demo-1",
           branch: "main",
           output: outputSource,
-          connectionArn: "",
+          connectionArn: "arn:aws:codestar-connections:us-east-1:059978233428:connection/395a5682-d574-47af-bb99-98f1f5aa0ce1",
         })
       ]
     });
